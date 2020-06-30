@@ -101,6 +101,6 @@ def getToken(String credentialsId, String url, String tenant, String resultPath)
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${credentialsId}", usernameVariable: 'USER', passwordVariable: 'PASS']]) {
         def authScript = libraryResource "scripts/getAuthToken.sh"
         writeFile file: "/tmp/getAuthToken.sh", text: authScript
-        sh(script: "bash /tmp/getAuthToken.sh ${url} ${USER} ${PASS} ${tenant}} ${resultPath}")
+        sh(script: "bash /tmp/getAuthToken.sh ${url} ${USER} ${PASS} ${tenant} ${resultPath}")
     }
 }
