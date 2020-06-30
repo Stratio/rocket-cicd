@@ -7,10 +7,13 @@ def call(Map props = [:]) {
         println("Rocket flow for workflow 2 envs")
 
         def sleep_time = 4
+
         def ROCKET_URL = props["ROCKET_API_URL_DEV"]
-        def ROCKET_COOKIE = ""
+        def TENANT_DEV = props["ROCKET_TENANT_DEV"]
+
         def ROCKET_URL_PROD = props["ROCKET_API_URL_PRO"]
-        def ROCKET_COOKIE_PROD = ""
+        def TENANT_PROD = props["ROCKET_TENANT_PRO"]
+
         def ASSET_VERSION_ID = props["assetVersionId"]
         def RELEASE_ID = props["releaseId"]
         def ARCHIVE_PATH = "${BUILD_TAG}.zip"
@@ -19,8 +22,10 @@ def call(Map props = [:]) {
         def READ_TIMEOUT = props["CONNECT_TIMEOUT"] ? props["CONNECT_TIMEOUT"] : "10000"
 
         stage('Init release') {
+            getToken("ROCKET_AUTH_CREDENTIALS_DEV", ROCKET_URL, TENANT_DEV, "token_dev")
+            getToken("ROCKET_AUTH_CREDENTIALS_PRO", ROCKET_URL_PROD, TENANT_PROD, "token_prod")
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DbuildUrl=$BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DbuildUrl=$BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
@@ -88,5 +93,14 @@ def call(Map props = [:]) {
                 sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:finish -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_URL -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
+    }
+}
+
+def getToken(String credentialsId, String url, String tenant, String resultPath) {
+
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${credentialsId}", usernameVariable: 'USER', passwordVariable: 'PASS']]) {
+        def authScript = libraryResource "scripts/getAuthToken.sh"
+        writeFile file: "/tmp/getAuthToken.sh", text: authScript
+        sh(script: "bash /tmp/getAuthToken.sh ${url} ${USER} ${PASS} ${tenant}} ${resultPath}")
     }
 }
