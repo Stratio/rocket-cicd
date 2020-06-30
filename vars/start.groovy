@@ -2,7 +2,7 @@
 
 def call(Map props = [:]) {
 
-    ansiColor('xterm') {
+    //ansiColor('xterm') {
 
         if (props["assetType"] == "Workflow") {
             doWorkflow2envs(props)
@@ -17,5 +17,5 @@ def call(Map props = [:]) {
         } else {
             error "Invalid asset type ${props['assetType']}"
         }
-    }
+    //}
 }
