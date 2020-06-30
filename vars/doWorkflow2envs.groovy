@@ -33,7 +33,7 @@ def call(Map props = [:]) {
 
         stage('Check prod instance') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkEnv -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DtargetEnvBaseUrl=$ROCKET_URL_PROD -DtargetEnvCookie=$ROCKET_COOKIE_PROD -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkEnv -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DtargetEnvBaseUrl=$ROCKET_URL_PROD -DtargetEnvCookie=\$(cat token_prod) -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
@@ -41,7 +41,7 @@ def call(Map props = [:]) {
 
         stage('Validate workflow') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validate -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validate -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
@@ -49,7 +49,7 @@ def call(Map props = [:]) {
 
         stage('Check asset dependencies') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkDependencies -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DassetVersionId=$ASSET_VERSION_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=$ROCKET_COOKIE_PROD -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkDependencies -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DassetVersionId=$ASSET_VERSION_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=\$(cat token_prod) -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
@@ -57,7 +57,7 @@ def call(Map props = [:]) {
 
         stage('Export asset') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAsset -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DexportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAsset -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DexportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
             archiveArtifacts artifacts: "${ARCHIVE_PATH}"
         }
@@ -66,7 +66,7 @@ def call(Map props = [:]) {
 
         stage('Import asset') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAsset -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_COOKIE -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=$ROCKET_COOKIE_PROD -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAsset -DrocketBaseUrl=$ROCKET_URL -Dcookie=\$(cat token_dev) -DassetVersionId=$ASSET_VERSION_ID -DreleaseId=$RELEASE_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=\$(cat token_prod) -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
@@ -74,7 +74,7 @@ def call(Map props = [:]) {
 
         stage('Set released') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:setReleased -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_URL -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=$ROCKET_COOKIE_PROD -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                sh "mvn com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:setReleased -DrocketBaseUrl=$ROCKET_URL -Dcookie=$ROCKET_URL -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DrocketBaseUrlProd=$ROCKET_URL_PROD -DcookieProd=\$(cat token_prod) -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
             }
         }
 
