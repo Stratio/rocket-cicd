@@ -23,13 +23,13 @@ def call(Map props = [:]) {
         def CONNECT_TIMEOUT = props["CONNECT_TIMEOUT"] ? props["CONNECT_TIMEOUT"] : "2000"
         def READ_TIMEOUT = props["CONNECT_TIMEOUT"] ? props["CONNECT_TIMEOUT"] : "10000"
 
-//        stage('Init release') {
-//            configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-//                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-//                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DbuildUrl=$BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
-//                }
-//            }
-//        }
+        stage('Init release') {
+            configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
+                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DassetVersionId=$ASSET_VERSION_ID -DbuildUrl=$BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                }
+            }
+        }
 //
 //        sleep(time: sleep_time, unit:"SECONDS")
 //
