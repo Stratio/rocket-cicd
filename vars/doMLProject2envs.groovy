@@ -17,7 +17,7 @@ def call(Map props = [:]) {
         def ASSET_VERSION_ID = props["assetVersionId"]
         def RELEASE_ID = props["releaseId"]
         def ARCHIVE_PATH = "${BUILD_TAG}.zip"
-        def MAVEN_PLUGIN_VERSION = props["MAVEN_PLUGIN_VERSION"] ? props["MAVEN_PLUGIN_VERSION"] : "1.1.0-d3ffff0"
+        def MAVEN_PLUGIN_VERSION = props["MAVEN_PLUGIN_VERSION"] ? props["MAVEN_PLUGIN_VERSION"] : "1.3.0-9e4c097"
         def CONNECT_TIMEOUT = props["CONNECT_TIMEOUT"] ? props["CONNECT_TIMEOUT"] : "2000"
         def READ_TIMEOUT = props["READ_TIMEOUT"] ? props["READ_TIMEOUT"] : "10000"
 
