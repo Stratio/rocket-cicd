@@ -3,6 +3,7 @@
 def call(String promomtionParameters) {
 
     ansiColor('xterm') {
-        println(promomtionParameters)
+        def promotion = readJSON text: promomtionParameters
+        println(promotion)
     }
 }
