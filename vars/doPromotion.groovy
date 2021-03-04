@@ -2,12 +2,10 @@
 
 def call(Map promotion = [:]) {
 
-    def generalParams = promotion["release"]["parameters"]
-    println(generalParams)
+    def parameters = promotion["release"]["parameters"]
+    def generalParams = parameters["General"]
+
     def NODE = generalParams?.JENKINS_NODE_NAME ?: "jenkins-slave-mvn-jdk11"
-
-    println(NODE)
-
     node(NODE) {
 
         println("Starting promotion for release ${promotion['releaseId']}")
