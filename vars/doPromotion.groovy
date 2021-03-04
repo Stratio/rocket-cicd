@@ -14,9 +14,6 @@ def call(Map promotion = [:]) {
         def PUBLIC_JENKINS_URL = generalParams?.PUBLIC_JENKINS_URL
         def REPLACED_BUILD_URL = PUBLIC_JENKINS_URL ? env.BUILD_URL.replace(env.JENKINS_URL, PUBLIC_JENKINS_URL) : env.BUILD_URL
 
-        println(env.JENKINS_URL)
-        println(REPLACED_BUILD_URL)
-
         def ROCKET_URL = generalParams["ROCKET_SOURCE_URL"]
         def ROCKET_TENANT = generalParams?.ROCKET_SOURCE_TENANT
 
@@ -39,7 +36,7 @@ def call(Map promotion = [:]) {
         stage('Init release') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DbuildUrl=$BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:init -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DbuildUrl=$REPLACED_BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -52,7 +49,7 @@ def call(Map promotion = [:]) {
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                 ]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkEnv -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:checkEnv -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -65,7 +62,7 @@ def call(Map promotion = [:]) {
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                 ]){
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validateAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validateAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -75,7 +72,7 @@ def call(Map promotion = [:]) {
         stage('Export asset') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DexportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DexportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
             archiveArtifacts artifacts: "${ARCHIVE_PATH}"
@@ -88,7 +85,7 @@ def call(Map promotion = [:]) {
                 configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: REPOSITORY_CREDENTIALS_ID, usernameVariable: 'REPOSITORY_USER', passwordVariable: 'REPOSITORY_PASSWORD']]) {
-                            sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:uploadArtifact -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DfilePath=$ARCHIVE_PATH -DrepositoryUrl=$REPOSITORY_URL -DrepositoryName=$REPOSITORY_NAME -DrepositoryUser=$REPOSITORY_USER -DrepositoryPassword=$REPOSITORY_PASSWORD -DrepositoryType=$REPOSITORY_TYPE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                            sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:uploadArtifact -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DfilePath=$ARCHIVE_PATH -DrepositoryUrl=$REPOSITORY_URL -DrepositoryName=$REPOSITORY_NAME -DrepositoryUser=$REPOSITORY_USER -DrepositoryPassword=$REPOSITORY_PASSWORD -DrepositoryType=$REPOSITORY_TYPE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                         }
                     }
                 }
@@ -103,7 +100,7 @@ def call(Map promotion = [:]) {
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                 ]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -113,7 +110,7 @@ def call(Map promotion = [:]) {
         stage('Set released') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:setAssetStates -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DassetState='Release' -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:setAssetStates -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DassetState='Release' -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -123,7 +120,7 @@ def call(Map promotion = [:]) {
         stage('Lock origin') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:lockAssetVersions -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:lockAssetVersions -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
@@ -133,7 +130,7 @@ def call(Map promotion = [:]) {
         stage('Finalize release') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s $MAVEN_SETTINGS com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:finish -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:finish -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
