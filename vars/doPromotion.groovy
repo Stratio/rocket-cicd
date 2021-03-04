@@ -18,14 +18,14 @@ def call(Map promotion = [:]) {
         def ROCKET_TARGET_TENANT = generalParams?.ROCKET_TARGET_TENANT
 
         def ARCHIVE_PATH = "${BUILD_TAG}.zip"
-        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "1.3.0-9e4c097"
+        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "2.0.0-SNAPSHOT"
 
         def CONNECT_TIMEOUT = generalParams?.CONNECT_TIMEOUT ?: "2000"
         def READ_TIMEOUT = generalParams?.READ_TIMEOUT ?: "10000"
 
         def REPOSITORY_URL = generalParams?.REPOSITORY_URL
         def REPOSITORY_NAME = generalParams?.REPOSITORY_NAME
-        def REPOSITORY_CREDENTIALS_ID = generalParams?.REPOSITORY_CREDENTIALS_ID
+        def REPOSITORY_CREDENTIALS_ID = generalParams?.REPOSITORY_CREDENTIALS_ID ?: "REPOSITORY_CREDENTIALS"
         def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
 
         def sleep_time = generalParams?.PAUSE_TIME ?: 4
