@@ -2,8 +2,7 @@
 
 def call(String promomtionParameters) {
 
-    //ansiColor('xterm') {
-        def promotion = readJSON text: promomtionParameters
-        doPromotion(promotion)
-    //}
+    def promotion = readJSON text: promomtionParameters
+    doPromotion(promotion)
+
 }
