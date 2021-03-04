@@ -3,6 +3,7 @@
 def call(Map promotion = [:]) {
 
     def generalParams = promotion["release"]["parameters"]
+    println(generalParams)
     def NODE = generalParams?.JENKINS_NODE_NAME ?: "jenkins-slave-mvn-jdk11"
 
     node(NODE) {
