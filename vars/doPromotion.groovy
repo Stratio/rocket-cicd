@@ -72,10 +72,10 @@ def call(Map promotion = [:]) {
         stage('Export asset') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
-                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DexportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:exportAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DexportPath='$ARCHIVE_PATH' -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
-            archiveArtifacts artifacts: "${ARCHIVE_PATH}"
+            archiveArtifacts artifacts: "'${ARCHIVE_PATH}'"
         }
 
         sleep(time: sleep_time, unit: "SECONDS")
@@ -85,7 +85,7 @@ def call(Map promotion = [:]) {
                 configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS']]) {
                         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: REPOSITORY_CREDENTIALS_ID, usernameVariable: 'REPOSITORY_USER', passwordVariable: 'REPOSITORY_PASSWORD']]) {
-                            sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:uploadArtifact -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DfilePath=$ARCHIVE_PATH -DrepositoryUrl=$REPOSITORY_URL -DrepositoryName=$REPOSITORY_NAME -DrepositoryUser=$REPOSITORY_USER -DrepositoryPassword=$REPOSITORY_PASSWORD -DrepositoryType=$REPOSITORY_TYPE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                            sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:uploadArtifact -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DfilePath='$ARCHIVE_PATH' -DrepositoryUrl=$REPOSITORY_URL -DrepositoryName=$REPOSITORY_NAME -DrepositoryUser=$REPOSITORY_USER -DrepositoryPassword=$REPOSITORY_PASSWORD -DrepositoryType=$REPOSITORY_TYPE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                         }
                     }
                 }
