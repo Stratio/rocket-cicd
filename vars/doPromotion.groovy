@@ -101,7 +101,7 @@ def call(Map promotion = [:]) {
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                 ]) {
-                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName=$TARGET_PROJECT_NAME -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
