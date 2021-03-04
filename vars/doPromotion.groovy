@@ -2,32 +2,32 @@
 
 def call(Map promotion = [:]) {
 
-    def props = promotion["parameters"]
-    def NODE = props["JENKINS_NODE_NAME"] ? props["JENKINS_NODE_NAME"] : "jenkins-slave-mvn-jdk11"
+    def generalParams = promotion["release"]["parameters"]
+    def NODE = generalParams["JENKINS_NODE_NAME"] ? generalParams["JENKINS_NODE_NAME"] : "jenkins-slave-mvn-jdk11"
 
     node(NODE) {
 
         println("Starting promotion for release ${promotion['releaseId']}")
         def RELEASE_ID = promotion["releaseId"]
 
-        def ROCKET_URL = props["ROCKET_SOURCE_URL"]
-        def ROCKET_TENANT = props?.ROCKET_SOURCE_TENANT
+        def ROCKET_URL = generalParams["ROCKET_SOURCE_URL"]
+        def ROCKET_TENANT = generalParams?.ROCKET_SOURCE_TENANT
 
-        def ROCKET_TARGET_URL = props["ROCKET_TARGET_URL"]
-        def ROCKET_TARGET_TENANT = props?.ROCKET_TARGET_TENANT
+        def ROCKET_TARGET_URL = generalParams["ROCKET_TARGET_URL"]
+        def ROCKET_TARGET_TENANT = generalParams?.ROCKET_TARGET_TENANT
 
         def ARCHIVE_PATH = "${BUILD_TAG}.zip"
-        def MAVEN_PLUGIN_VERSION = props["MAVEN_PLUGIN_VERSION"] ? props["MAVEN_PLUGIN_VERSION"] : "1.3.0-9e4c097"
+        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "1.3.0-9e4c097"
 
-        def CONNECT_TIMEOUT = props["CONNECT_TIMEOUT"] ? props["CONNECT_TIMEOUT"] : "2000"
-        def READ_TIMEOUT = props["READ_TIMEOUT"] ? props["READ_TIMEOUT"] : "10000"
+        def CONNECT_TIMEOUT = generalParams?.CONNECT_TIMEOUT ?: "2000"
+        def READ_TIMEOUT = generalParams?.READ_TIMEOUT ?: "10000"
 
-        def REPOSITORY_URL = props?.REPOSITORY_URL
-        def REPOSITORY_NAME = props?.REPOSITORY_NAME
-        def REPOSITORY_CREDENTIALS_ID = props?.REPOSITORY_CREDENTIALS_ID
-        def REPOSITORY_TYPE = props?.REPOSITORY_TYPE
+        def REPOSITORY_URL = generalParams?.REPOSITORY_URL
+        def REPOSITORY_NAME = generalParams?.REPOSITORY_NAME
+        def REPOSITORY_CREDENTIALS_ID = generalParams?.REPOSITORY_CREDENTIALS_ID
+        def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
 
-        def sleep_time = props["PAUSE_TIME"]
+        def sleep_time = generalParams?.PAUSE_TIME ?: 4
 
         stage('Init release') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
