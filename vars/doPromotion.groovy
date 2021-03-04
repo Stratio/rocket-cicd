@@ -14,6 +14,7 @@ def call(Map promotion = [:]) {
         def PUBLIC_JENKINS_URL = generalParams?.PUBLIC_JENKINS_URL
         def REPLACED_BUILD_URL = PUBLIC_JENKINS_URL ? env.BUILD_URL.replace("http://", "https://").replace(env.JENKINS_URL, PUBLIC_JENKINS_URL) : env.BUILD_URL
 
+        println(env.JENKINS_URL)
         println(REPLACED_BUILD_URL)
 
         def ROCKET_URL = generalParams["ROCKET_SOURCE_URL"]
