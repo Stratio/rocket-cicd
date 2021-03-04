@@ -8,9 +8,13 @@ def call(Map promotion = [:]) {
     def NODE = generalParams?.JENKINS_NODE_NAME ?: "jenkins-slave-mvn-jdk11"
     node(NODE) {
 
-        sh "env"
         println("Starting promotion for release ${promotion['releaseId']}")
         def RELEASE_ID = promotion["releaseId"]
+
+        def PUBLIC_JENKINS_URL = generalParams?.PUBLIC_JENKINS_URL
+        def REPLACED_BUILD_URL = PUBLIC_JENKINS_URL ? env.BUILD_URL.replace("http://", "https://").replace(env.JENKINS_URL, PUBLIC_JENKINS_URL) : env.BUILD_URL
+
+        println(REPLACED_BUILD_URL)
 
         def ROCKET_URL = generalParams["ROCKET_SOURCE_URL"]
         def ROCKET_TENANT = generalParams?.ROCKET_SOURCE_TENANT
