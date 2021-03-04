@@ -8,7 +8,7 @@ def call(Map promotion = [:]) {
     def NODE = generalParams?.JENKINS_NODE_NAME ?: "jenkins-slave-mvn-jdk11"
     node(NODE) {
 
-        println(env)
+        sh "env"
         println("Starting promotion for release ${promotion['releaseId']}")
         def RELEASE_ID = promotion["releaseId"]
 
