@@ -12,7 +12,7 @@ def call(Map promotion = [:]) {
         def RELEASE_ID = promotion["releaseId"]
 
         def PUBLIC_JENKINS_URL = generalParams?.PUBLIC_JENKINS_URL
-        def REPLACED_BUILD_URL = PUBLIC_JENKINS_URL ? env.BUILD_URL.replace("http://", "https://").replace(env.JENKINS_URL, PUBLIC_JENKINS_URL) : env.BUILD_URL
+        def REPLACED_BUILD_URL = PUBLIC_JENKINS_URL ? env.BUILD_URL.replace(env.JENKINS_URL, PUBLIC_JENKINS_URL) : env.BUILD_URL
 
         println(env.JENKINS_URL)
         println(REPLACED_BUILD_URL)
