@@ -22,7 +22,7 @@ def call(Map promotion = [:]) {
         def TARGET_PROJECT_NAME = generalParams?.TARGET_PROJECT_NAME ?: ""
 
         def ARCHIVE_PATH = "${BUILD_TAG}.zip".replace(" ", "-")
-        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "2.0.0-SNAPSHOT"
+        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "2.2.0-SNAPSHOT"
 
         def CONNECT_TIMEOUT = generalParams?.CONNECT_TIMEOUT ?: "2000"
         def READ_TIMEOUT = generalParams?.READ_TIMEOUT ?: "10000"
@@ -31,6 +31,8 @@ def call(Map promotion = [:]) {
         def REPOSITORY_NAME = generalParams?.REPOSITORY_NAME
         def REPOSITORY_CREDENTIALS_ID = generalParams?.REPOSITORY_CREDENTIALS_ID ?: "REPOSITORY_CREDENTIALS"
         def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
+
+        def CREATE_PROJECT_BACKUP = generalParams?.CREATE_PROJECT_BACKUP ?: "true"
 
         def sleep_time = generalParams?.PAUSE_TIME ?: 4
 
@@ -89,6 +91,19 @@ def call(Map promotion = [:]) {
                             sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:uploadArtifact -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DfilePath=$ARCHIVE_PATH -DrepositoryUrl=$REPOSITORY_URL -DrepositoryName=$REPOSITORY_NAME -DrepositoryUser=$REPOSITORY_USER -DrepositoryPassword=$REPOSITORY_PASSWORD -DrepositoryType=$REPOSITORY_TYPE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                         }
                     }
+                }
+            }
+        }
+
+        sleep(time: sleep_time, unit: "SECONDS")
+
+        stage('Create project Backup') {
+            configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
+                withCredentials([
+                        [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
+                        [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
+                ]) {
+                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:backupProject -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DpromotionUrl=$REPLACED_BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
         }
