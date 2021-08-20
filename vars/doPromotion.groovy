@@ -32,7 +32,8 @@ def call(Map promotion = [:]) {
         def REPOSITORY_CREDENTIALS_ID = generalParams?.REPOSITORY_CREDENTIALS_ID ?: "REPOSITORY_CREDENTIALS"
         def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
 
-        def CREATE_PROJECT_BACKUP = generalParams?.CREATE_PROJECT_BACKUP ?: "true"
+        def ENFORCE_BACKUP_AND_RESTORE = generalParams?.ENFORCE_BACKUP_AND_RESTORE?.toBoolean() ?: "false".toBoolean()
+        def IMPORT_ERROR = false
 
         def sleep_time = generalParams?.PAUSE_TIME ?: 4
 
@@ -95,15 +96,16 @@ def call(Map promotion = [:]) {
             }
         }
 
-        sleep(time: sleep_time, unit: "SECONDS")
-
-        stage('Create project Backup') {
-            configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
-                withCredentials([
-                        [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
-                        [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
-                ]) {
-                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:backupProject -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DpromotionUrl=$REPLACED_BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+        if (ENFORCE_BACKUP_AND_RESTORE) {
+            sleep(time: sleep_time, unit: "SECONDS")
+            stage('Create project Backup') {
+                configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
+                    withCredentials([
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
+                    ]) {
+                        sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:backupProject -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DpromotionUrl=$REPLACED_BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    }
                 }
             }
         }
@@ -116,7 +118,26 @@ def call(Map promotion = [:]) {
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
                         [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                 ]) {
-                    sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DimportPath=$ARCHIVE_PATH -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    try {
+                        sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:importAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DimportPath=$ARCHIVE_PATH -DrestoreBackup=$ENFORCE_BACKUP_AND_RESTORE -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                    } catch (Exception e) {
+                        IMPORT_ERROR = true
+                    }
+                }
+            }
+        }
+
+        if (ENFORCE_BACKUP_AND_RESTORE && IMPORT_ERROR) {
+            sleep(time: sleep_time, unit: "SECONDS")
+            stage('Restore Backup Project') {
+                configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
+                    withCredentials([
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS", usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "ROCKET_AUTH_CREDENTIALS_TARGET", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
+                    ]) {
+                        sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:restoreBackupProject -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
+                        error("Error while import assets. Restore completed and promotion marked as Failed.")
+                    }
                 }
             }
         }
