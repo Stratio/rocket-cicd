@@ -3,7 +3,7 @@
 
     <groupId>com.stratio.rocket</groupId>
     <artifactId>rocketlibrary</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
 
     <name>Rocket Global Shared Library</name>
     <description>Stratio Jenkins shared library for Rocket workflows promotion</description>
