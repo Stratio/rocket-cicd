@@ -33,7 +33,7 @@ def call(Map promotion = [:]) {
         def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
 
         def ENFORCE_BACKUP_AND_RESTORE = generalParams?.ENFORCE_BACKUP_AND_RESTORE?.toBoolean() ?: "false".toBoolean()
-        def ENFORCE_ASSET_VALIDATION = generalParams?.ENFORCE_ASSET_VALIDATION?.toBoolean() ?: "true".toBoolean()
+        def ENFORCE_ASSET_VALIDATION = generalParams?.ENFORCE_ASSET_VALIDATION?.toBoolean() ?: "false".toBoolean()
         def IMPORT_ERROR = false
 
         def sleep_time = generalParams?.PAUSE_TIME ?: 4
