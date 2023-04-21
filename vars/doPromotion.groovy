@@ -33,6 +33,7 @@ def call(Map promotion = [:]) {
         def REPOSITORY_TYPE = generalParams?.REPOSITORY_TYPE
 
         def ENFORCE_BACKUP_AND_RESTORE = generalParams?.ENFORCE_BACKUP_AND_RESTORE?.toBoolean() ?: "false".toBoolean()
+        def ENFORCE_ASSET_VALIDATION = generalParams?.ENFORCE_ASSET_VALIDATION?.toBoolean() ?: "true".toBoolean()
         def IMPORT_ERROR = false
 
         def sleep_time = generalParams?.PAUSE_TIME ?: 4
@@ -58,8 +59,8 @@ def call(Map promotion = [:]) {
             }
         }
 
+        if (ENFORCE_ASSET_VALIDATION) {
         sleep(time: sleep_time, unit:"SECONDS")
-
         stage('Validate workflow') {
             configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                 withCredentials([
@@ -69,6 +70,7 @@ def call(Map promotion = [:]) {
                     sh "mvn -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validateAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=$ROCKET_PASS -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                 }
             }
+        }
         }
 
         sleep(time: sleep_time, unit:"SECONDS")
