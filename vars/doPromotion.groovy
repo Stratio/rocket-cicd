@@ -22,7 +22,7 @@ def call(Map promotion = [:]) {
         def TARGET_PROJECT_NAME = generalParams?.TARGET_PROJECT_NAME ?: ""
 
         def ARCHIVE_PATH = "${BUILD_TAG}.zip".replace(" ", "-")
-        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "3.3.0-SNAPSHOT"
+        def MAVEN_PLUGIN_VERSION = generalParams?.MAVEN_PLUGIN_VERSION ?: "3.4.0-SNAPSHOT"
         def MAVEN_OPTIONS= generalParams?.MAVEN_OPTIONS ?: ""
 
         def CONNECT_TIMEOUT = generalParams?.CONNECT_TIMEOUT ?: "2000"
