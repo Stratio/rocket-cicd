@@ -50,7 +50,7 @@ def call(Map promotion = [:]) {
             echo "Unable to get and parse rocketdict file from the Config File Provider plugin. Using default values..."
         }
 
-        // Retrieves credentials from the configuration file or uses default values.
+        // Get credentials from the Jenkinks configuration file if present (called 'rocketdict') or otherwise uses default values based-on Jenkins credentials parameters: rocket-auth-credentials & rocket-auth-credentials-target.
         def ROCKET_ORIGIN_CREDENTIALS_ID = rocketConfig.get(ROCKET_URL, 'rocket-auth-credentials')
         def ROCKET_TARGET_CREDENTIALS_ID = rocketConfig.get(ROCKET_TARGET_URL, 'rocket-auth-credentials-target')
 
