@@ -8,10 +8,6 @@ def call(Map promotion = [:]) {
     def NODE = generalParams?.JENKINS_NODE_NAME ?: "jenkins-slave-mvn-jdk11"
     node(NODE) {
 
-        // Get configuration file from jenkins if present
-
-
-
         println("Starting promotion for release ${promotion['releaseId']}")
         def RELEASE_ID = promotion["releaseId"]
 
@@ -54,7 +50,7 @@ def call(Map promotion = [:]) {
             echo "Unable to get and parse rocketdict file from the Config File Provider plugin. Using default values..."
         }
 
-        // Grab the credentials stored in Jenkins or K8s secret used for each  url
+        // Get credentials from the Jenkinks configuration file if present (called 'rocketdict') or otherwise uses default values based-on Jenkins credentials parameters: rocket-auth-credentials & rocket-auth-credentials-target.
         def ROCKET_ORIGIN_CREDENTIALS_ID = rocketConfig.get(ROCKET_URL, 'rocket-auth-credentials')
         def ROCKET_TARGET_CREDENTIALS_ID = rocketConfig.get(ROCKET_TARGET_URL, 'rocket-auth-credentials-target')
 
@@ -87,7 +83,7 @@ def call(Map promotion = [:]) {
                 configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([
                             [$class: 'UsernamePasswordMultiBinding', credentialsId: ROCKET_ORIGIN_CREDENTIALS_ID, usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
-                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "rocket-auth-credentials-target", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: ROCKET_TARGET_CREDENTIALS_ID, usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                     ]){
                         sh "mvn $MAVEN_OPTIONS -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:validateAssets -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=${ROCKET_PASS} -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                     }
@@ -126,7 +122,7 @@ def call(Map promotion = [:]) {
                 configFileProvider([configFile(fileId: 'NexusMultiRepoSettings', variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([
                             [$class: 'UsernamePasswordMultiBinding', credentialsId: ROCKET_ORIGIN_CREDENTIALS_ID, usernameVariable: 'ROCKET_USER', passwordVariable: 'ROCKET_PASS'],
-                            [$class: 'UsernamePasswordMultiBinding', credentialsId: "rocket-auth-credentials-target", usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
+                            [$class: 'UsernamePasswordMultiBinding', credentialsId: ROCKET_TARGET_CREDENTIALS_ID, usernameVariable: 'ROCKET_TARGET_USER', passwordVariable: 'ROCKET_TARGET_PASS']
                     ]) {
                         sh "mvn $MAVEN_OPTIONS -s '$MAVEN_SETTINGS' com.stratio.rocket:rocket-maven-plugin:${MAVEN_PLUGIN_VERSION}:backupProject -DrocketBaseUrl=$ROCKET_URL -Duser=$ROCKET_USER -Dpassword=${ROCKET_PASS} -Dtenant=$ROCKET_TENANT -DreleaseId=$RELEASE_ID -DtargetEnvBaseUrl=$ROCKET_TARGET_URL -DtargetEnvUser=$ROCKET_TARGET_USER -DtargetEnvPassword=$ROCKET_TARGET_PASS -DtargetEnvTenant=$ROCKET_TARGET_TENANT -DtargetProjectName='$TARGET_PROJECT_NAME' -DpromotionUrl=$REPLACED_BUILD_URL -DconnectTimeout=$CONNECT_TIMEOUT -DreadTimeout=$READ_TIMEOUT"
                     }
